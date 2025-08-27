@@ -37,7 +37,7 @@ export default function AdminDashboard() {
 
   const { user: adminUser, token } = useAuth();
   const volunteers = users.filter(user => user.role === 'volunteer');
-  const userRoles = ['admin', 'aid_requester', 'donor', 'volunteer'];
+  const userRoles = ['admin', 'aidrequester', 'donor', 'volunteer'];
 
   const fetchData = async () => {
     if (token) {

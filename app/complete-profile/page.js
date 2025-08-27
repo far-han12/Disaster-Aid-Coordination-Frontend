@@ -21,16 +21,33 @@ export default function CompleteProfilePage() {
   const { token, user, refreshUser } = useAuth();
   const router = useRouter();
 
-  // Pre-fill the name fields when the user data is loaded
+  // Fetch and pre-fill all existing contact info
   useEffect(() => {
-    if (user) {
-      setFirstName(user.first_name || '');
-      setLastName(user.last_name || '');
+    if (token) {
+      api.getMyContactInfo(token)
+        .then(res => {
+          const contactInfo = res.data?.contactInfo || {};
+          setFirstName(contactInfo.first_name || user?.first_name || '');
+          setLastName(contactInfo.last_name || user?.last_name || '');
+          setPhone(contactInfo.phone_no || '');
+          setStreet(contactInfo.street || '');
+          setCity(contactInfo.city || '');
+          setState(contactInfo.state || '');
+        })
+        .catch(() => {
+          toast.error("Could not load your profile data.");
+        });
     }
-  }, [user]);
+  }, [token, user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!token) {
+      toast.error("You are not authenticated. Please log in again.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const contactData = {
@@ -44,10 +61,9 @@ export default function CompleteProfilePage() {
       await api.createMyContactInfo(contactData, token);
       await refreshUser(); // Refresh the user data in the context
       
-      toast.success('Profile completed successfully!');
+      toast.success('Profile updated successfully!');
       
-      // Redirect to the correct dashboard
-      const rolePath = user.role === 'aid_requester' ? 'requester' : user.role;
+      const rolePath = user.role === 'aidrequester' ? 'requester' : user.role;
       router.push(`/${rolePath}/dashboard`);
 
     } catch (err) {
@@ -61,19 +77,19 @@ export default function CompleteProfilePage() {
     <div className="flex items-center justify-center min-h-[80vh]">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
-          <CardDescription>Please provide your contact information to continue.</CardDescription>
+          <CardTitle className="text-2xl">My Profile</CardTitle>
+          <CardDescription>Keep your contact information up to date.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required disabled />
+                <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required disabled />
+                <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
               </div>
             </div>
             <div className="grid gap-2">
@@ -95,7 +111,7 @@ export default function CompleteProfilePage() {
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Save and Continue'}
+                {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
           </form>
         </CardContent>

@@ -60,6 +60,9 @@ export default function Header() {
                   Dashboard
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                 <DropdownMenuItem onClick={() => router.push('/complete-profile')}>
+                  My Profile
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   Log out
                 </DropdownMenuItem>

@@ -16,20 +16,15 @@ export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
 
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     try {
       const userData = await login(email, password);
       
       if (userData && userData.role) {
-        // THE NEW REDIRECT LOGIC
-        if (userData.is_profile_complete) {
-          const rolePath = userData.role === 'aidrequester' ? 'aidrequester' : userData.role;
-          router.push(`/${rolePath}/dashboard`);
-        } else {
-          router.push('/complete-profile');
-        }
+        const rolePath = userData.role === 'aidrequester' ? 'requester' : userData.role;
+        router.push(`/${rolePath}/dashboard`);
       } else {
         throw new Error('Login successful, but user data is missing.');
       }
