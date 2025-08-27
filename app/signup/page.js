@@ -81,7 +81,7 @@ export default function SignupPage() {
                         <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="admin">Aid Requester</SelectItem>
+                        <SelectItem value="aidrequester">Aid Requester</SelectItem>
                         <SelectItem value="donor">Donor</SelectItem>
                         <SelectItem value="volunteer">Volunteer</SelectItem>
                     </SelectContent>
