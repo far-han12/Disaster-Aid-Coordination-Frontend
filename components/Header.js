@@ -56,7 +56,7 @@ export default function Header() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => user.role && router.push(`/${user.role === 'aid_requester' ? 'requester' : user.role}/dashboard`)}>
+                <DropdownMenuItem onClick={() => user.role && router.push(`/${user.role === 'aidrequester' ? 'requester' : user.role}/dashboard`)}>
                   Dashboard
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

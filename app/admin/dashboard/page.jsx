@@ -29,6 +29,7 @@ export default function AdminDashboard() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [selectedResource, setSelectedResource] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedMatch, setSelectedMatch] = useState(null);
   
   const [selectedVolunteer, setSelectedVolunteer] = useState('');
   const [newRole, setNewRole] = useState('');
@@ -126,6 +127,30 @@ export default function AdminDashboard() {
         toast.error(error.message || "Failed to delete resource.");
     }
   };
+  
+  const handleFindMatches = async () => {
+    try {
+        const res = await api.findNewMatches(token);
+        toast.success(res.message);
+        fetchData(); // Refresh the list of matches
+    } catch (error) {
+        toast.error("Failed to find new matches.");
+    }
+  };
+
+  const handleConfirmAndAssign = async () => {
+    if (!selectedMatch || !selectedVolunteer) {
+        toast.error("Please select a volunteer.");
+        return;
+    }
+    try {
+        await api.confirmMatch(selectedMatch.match_id, selectedVolunteer, token);
+        toast.success("Match confirmed and volunteer assigned!");
+        fetchData(); // Refresh all data
+    } catch (error) {
+        toast.error(error.message || "Failed to confirm match.");
+    }
+  };
 
   return (
     <div>
@@ -141,11 +166,54 @@ export default function AdminDashboard() {
         <TabsContent value="matches" className="mt-4">
             <Card>
                 <CardHeader>
-                    <CardTitle>Potential Matches</CardTitle>
-                    <CardDescription>Auto-generated matches between requests and resources.</CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle>Potential Matches</CardTitle>
+                            <CardDescription>Auto-generated matches between requests and resources.</CardDescription>
+                        </div>
+                        <Button onClick={handleFindMatches}>Find New Matches</Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
-                    {/* Content for matches will go here */}
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Request Type</TableHead>
+                                <TableHead>Requester</TableHead>
+                                <TableHead>Donor</TableHead>
+                                <TableHead className="text-right">Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {matches.map(match => (
+                                <TableRow key={match.match_id}>
+                                    <TableCell>{match.aid_type}</TableCell>
+                                    <TableCell>{match.requester_email}</TableCell>
+                                    <TableCell>{match.donor_email}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Dialog onOpenChange={(isOpen) => { if(isOpen) setSelectedMatch(match); }}>
+                                            <DialogTrigger asChild><Button size="sm">Confirm & Assign</Button></DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader><DialogTitle>Assign Volunteer</DialogTitle></DialogHeader>
+                                                <div className="py-4">
+                                                    <Label>Select a volunteer to deliver the resource.</Label>
+                                                    <Select onValueChange={setSelectedVolunteer}>
+                                                        <SelectTrigger><SelectValue placeholder="Select volunteer..." /></SelectTrigger>
+                                                        <SelectContent>
+                                                            {volunteers.map(v => <SelectItem key={v.id} value={v.id.toString()}>{v.email}</SelectItem>)}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <DialogFooter>
+                                                    <DialogClose asChild><Button onClick={handleConfirmAndAssign}>Confirm</Button></DialogClose>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </CardContent>
             </Card>
         </TabsContent>

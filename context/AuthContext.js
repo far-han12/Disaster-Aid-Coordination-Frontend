@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   };
   
   const signup = async (userData) => {
-    const formattedRole = userData.role === 'aidrequester' ? 'aid_requester' : userData.role;
+    const formattedRole = userData.role === 'aidrequester' ? 'aidrequester' : userData.role;
     await api.signup({ ...userData, role: formattedRole });
   };
 
@@ -54,9 +54,22 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
   };
+  const refreshUser = async () => {
+    if (token) {
+      try {
+        const response = await api.getMe(token);
+        if (response && response.data && response.data.user) {
+          setUser(response.data.user);
+        }
+      } catch (error) {
+        console.error("Failed to refresh user", error);
+        logout(); // Log out if token is invalid
+      }
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, signup, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, signup, logout, loading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
