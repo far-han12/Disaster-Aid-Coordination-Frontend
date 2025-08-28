@@ -66,7 +66,7 @@ export default function DonorDashboard() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Donor Dashboard</h1>
+        <h1 className="text-3xl font-bold">Contributor Dashboard</h1>
         <p className="text-gray-500 dark:text-gray-400">Register your available resources and view nearby aid requests.</p>
       </div>
       

@@ -82,7 +82,7 @@ export default function SignupPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="aidrequester">Aid Requester</SelectItem>
-                        <SelectItem value="donor">Donor</SelectItem>
+                        <SelectItem value="donor">Contributor</SelectItem>
                         <SelectItem value="volunteer">Volunteer</SelectItem>
                     </SelectContent>
                 </Select>

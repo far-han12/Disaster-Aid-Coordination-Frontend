@@ -39,7 +39,7 @@ export default function VolunteerDashboard() {
               <CardContent className="grid md:grid-cols-2 gap-6">
                 {/* Pickup Location */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <h3 className="font-semibold text-lg mb-2">1. Pick Up From (Donor)</h3>
+                  <h3 className="font-semibold text-lg mb-2">1. Pick Up From (Contributor)</h3>
                   <Separator />
                   <div className="mt-3 space-y-1 text-sm">
                     <p><strong>Name:</strong> {task.donor_first_name} {task.donor_last_name}</p>

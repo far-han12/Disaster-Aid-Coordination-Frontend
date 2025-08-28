@@ -341,7 +341,7 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                     <Table>
-                        <TableHeader><TableRow><TableHead>Donor</TableHead><TableHead>Resource Type</TableHead><TableHead>Quantity</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                        <TableHeader><TableRow><TableHead>Contributor</TableHead><TableHead>Resource Type</TableHead><TableHead>Quantity</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
                         <TableBody>
                             {resources.map(res => (
                                 <TableRow key={res.id}>
