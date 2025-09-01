@@ -3,7 +3,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import Header from '@/components/Header';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
-
+import 'leaflet/dist/leaflet.css'; 
 export const metadata = {
   title: 'Disaster Aid Coordination',
   description: 'A platform to coordinate disaster relief efforts.',

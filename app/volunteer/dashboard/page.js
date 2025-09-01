@@ -4,71 +4,99 @@ import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import toast from 'react-hot-toast';
+import { Package, User, Phone, Home, Truck } from 'lucide-react';
 
 export default function VolunteerDashboard() {
-  const [assignedTasks, setAssignedTasks] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const { token } = useAuth();
 
-  useEffect(() => {
+  const fetchAssignments = () => {
     if (token) {
       api.getMyAssignments(token)
-        .then(res => {
-          if (res && Array.isArray(res.data)) {
-            setAssignedTasks(res.data);
-          }
-        })
-        .catch(console.error);
+        .then(res => setAssignments(res.data || []))
+        .catch(() => toast.error("Failed to load assigned tasks."));
     }
+  };
+
+  useEffect(() => {
+    fetchAssignments();
   }, [token]);
+
+  const handleCompleteTask = async (assignmentId) => {
+    try {
+      await api.completeAssignment(assignmentId, token);
+      toast.success("Task successfully marked as complete!");
+      fetchAssignments(); // Refresh the list
+    } catch (error) {
+      toast.error(error.message || "Failed to complete task.");
+    }
+  };
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Volunteer Dashboard</h1>
-        <p className="text-gray-500 dark:text-gray-400">View aid requests that have been assigned to you.</p>
+        <p className="text-muted-foreground">Here are your currently assigned tasks.</p>
       </div>
-
-      <div className="space-y-6">
-        {assignedTasks.length > 0 ? (
-          assignedTasks.map(task => (
-            <Card key={task.assignment_id}>
+      
+      {assignments.length > 0 ? (
+        <div className="grid gap-6">
+          {assignments.map(assignment => (
+            <Card key={assignment.assignment_id}>
               <CardHeader>
-                <CardTitle>Task: Deliver {task.aid_type}</CardTitle>
-                <CardDescription>Status: <span className="font-semibold text-blue-500">{task.request_status}</span></CardDescription>
-              </CardHeader>
-              <CardContent className="grid md:grid-cols-2 gap-6">
-                {/* Pickup Location */}
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <h3 className="font-semibold text-lg mb-2">1. Pick Up From (Contributor)</h3>
-                  <Separator />
-                  <div className="mt-3 space-y-1 text-sm">
-                    <p><strong>Name:</strong> {task.donor_first_name} {task.donor_last_name}</p>
-                    <p><strong>Phone:</strong> {task.donor_phone}</p>
-                    <p><strong>Address:</strong> {task.donor_street}, {task.donor_city}</p>
-                  </div>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle className="flex items-center gap-2">
+                            <Package className="h-6 w-6" />
+                            Deliver: {assignment.aid_type}
+                        </CardTitle>
+                        <CardDescription>
+                            Status: <span className={`font-semibold ${assignment.request_status === 'fulfilled' ? 'text-green-500' : 'text-orange-500'}`}>{assignment.request_status}</span>
+                        </CardDescription>
+                    </div>
+                    {assignment.request_status !== 'fulfilled' && (
+                        <Button onClick={() => handleCompleteTask(assignment.assignment_id)}>
+                            <Truck className="mr-2 h-4 w-4" /> Mark as Completed
+                        </Button>
+                    )}
                 </div>
-
-                {/* Delivery Location */}
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <h3 className="font-semibold text-lg mb-2">2. Deliver To (Requester)</h3>
-                  <Separator />
-                  <div className="mt-3 space-y-1 text-sm">
-                    <p><strong>Name:</strong> {task.requester_first_name} {task.requester_last_name}</p>
-                    <p><strong>Phone:</strong> {task.requester_phone}</p>
-                    <p><strong>Address:</strong> {task.requester_street}, {task.requester_city}</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Pickup Details */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Pick Up From (Donor)</h3>
+                    <Separator />
+                    <div className="space-y-2">
+                      <p className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /> {assignment.donor_first_name} {assignment.donor_last_name}</p>
+                      <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> {assignment.donor_phone}</p>
+                      <p className="flex items-center gap-2"><Home className="h-4 w-4 text-muted-foreground" /> {assignment.donor_street}, {assignment.donor_city}</p>
+                    </div>
+                  </div>
+                  {/* Delivery Details */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Deliver To (Requester)</h3>
+                    <Separator />
+                    <div className="space-y-2">
+                      <p className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /> {assignment.requester_first_name} {assignment.requester_last_name}</p>
+                      <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> {assignment.requester_phone}</p>
+                      <p className="flex items-center gap-2"><Home className="h-4 w-4 text-muted-foreground" /> {assignment.requester_street}, {assignment.requester_city}</p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          ))
-        ) : (
-          <Card>
-            <CardContent className="pt-6">
-              <p>You have no assigned tasks at the moment.</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <Card className="text-center p-10">
+          <CardTitle>No Assigned Tasks</CardTitle>
+          <CardDescription className="mt-2">You currently have no tasks assigned to you. Check back later!</CardDescription>
+        </Card>
+      )}
     </div>
   );
 }
+
