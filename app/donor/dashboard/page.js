@@ -178,13 +178,14 @@ export default function DonorDashboard() {
                     </div>
                     <div className="max-h-[500px] xl:max-h-[600px] overflow-y-auto">
                         <Table>
-                            <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Status</TableHead><TableHead>Urgency</TableHead></TableRow></TableHeader>
+                            <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Quantity</TableHead><TableHead>Status</TableHead><TableHead>Urgency</TableHead></TableRow></TableHeader>
                             <TableBody>
                                 {isLoadingNearby ? (
                                     <TableRow><TableCell colSpan="3" className="text-center">Loading requests...</TableCell></TableRow>
                                 ) : nearbyRequests.length > 0 ? nearbyRequests.map(req => (
                                     <TableRow key={req.id}>
                                         <TableCell>{req.aid_type}</TableCell>
+                                            <TableCell>{req.quantity}</TableCell>
                                         <TableCell className="capitalize">{req.status}</TableCell>
                                         <TableCell className="capitalize">{req.urgency}</TableCell>
                                     </TableRow>
@@ -198,33 +199,39 @@ export default function DonorDashboard() {
             </Card>
         </TabsContent>
 
-        <TabsContent value="all-requests" className="mt-4">
-             <Card>
+         <TabsContent value="all-requests" className="mt-4">
+            <Card>
                 <CardHeader>
                     <CardTitle>All Open Aid Requests</CardTitle>
-                    <CardDescription>A list of all aid requests across the platform.</CardDescription>
+                    <CardDescription>A list of all aid requests in the system.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                     <Table>
-                        <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Status</TableHead><TableHead>Urgency</TableHead><TableHead>Location</TableHead></TableRow></TableHeader>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Requester</TableHead>
+                                <TableHead>Type</TableHead>
+                                <TableHead>Quantity</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Location</TableHead>
+                            </TableRow>
+                        </TableHeader>
                         <TableBody>
-                            {isLoadingAll ? (
-                                <TableRow><TableCell colSpan="4" className="text-center">Loading requests...</TableCell></TableRow>
-                            ) : allRequests.length > 0 ? allRequests.map(req => (
+                            {allRequests.map(req => (
                                 <TableRow key={req.id}>
+                                    <TableCell>{req.first_name} {req.last_name}</TableCell>
                                     <TableCell>{req.aid_type}</TableCell>
-                                    <TableCell className="capitalize">{req.status}</TableCell>
-                                    <TableCell className="capitalize">{req.urgency}</TableCell>
+                                    <TableCell>{req.quantity}</TableCell>
+                                    <TableCell>{req.status}</TableCell>
                                     <TableCell>{req.city || 'N/A'}</TableCell>
                                 </TableRow>
-                            )) : (
-                                <TableRow><TableCell colSpan="4" className="text-center">No aid requests found.</TableCell></TableRow>
-                            )}
+                            ))}
                         </TableBody>
                     </Table>
                 </CardContent>
             </Card>
         </TabsContent>
+        
 
         <TabsContent value="register" className="mt-4">
             <Card>
@@ -251,23 +258,34 @@ export default function DonorDashboard() {
             </Card>
         </TabsContent>
 
-        <TabsContent value="my-resources" className="mt-4">
-             <Card>
+     
+            <TabsContent value="my-resources" className="mt-4">
+            <Card>
                 <CardHeader>
                     <CardTitle>My Registered Resources</CardTitle>
                     <CardDescription>Here is a list of resources you have registered.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                     <Table>
-                        <TableHeader><TableRow><TableHead>Resource Type</TableHead><TableHead>Quantity</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                    <Table>
+                        <TableHeader><TableRow><TableHead>Resource Type</TableHead><TableHead>Quantity</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
                         <TableBody>
-                            {myResources.map(res => (
-                                <TableRow key={res.id}>
+                            {myResources.map(res => {
+                                const isAvailable = res.quantity > 0;
+                                return (
+                                <TableRow key={res.id} className={!isAvailable ? 'bg-muted/50' : ''}>
                                     <TableCell>{res.resource_type}</TableCell>
                                     <TableCell>{res.quantity}</TableCell>
+                                    <TableCell>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                            isAvailable ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' :
+                                            'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300'
+                                        }`}>
+                                            {isAvailable ? 'Available' : 'Used'}
+                                        </span>
+                                    </TableCell>
                                     <TableCell className="text-right space-x-2">
                                         <Dialog onOpenChange={(isOpen) => { if (isOpen) { setSelectedResource(res); setEditData({ resource_type: res.resource_type, quantity: res.quantity }); }}}>
-                                            <DialogTrigger asChild><Button variant="outline" size="sm">Edit</Button></DialogTrigger>
+                                            <DialogTrigger asChild><Button variant="outline" size="sm" disabled={!isAvailable}>Edit</Button></DialogTrigger>
                                             <DialogContent>
                                                 <DialogHeader><DialogTitle>Edit Resource</DialogTitle></DialogHeader>
                                                 <div className="grid gap-4 py-4">
@@ -277,7 +295,7 @@ export default function DonorDashboard() {
                                                 <DialogFooter><DialogClose asChild><Button onClick={handleUpdateResource}>Save</Button></DialogClose></DialogFooter>
                                             </DialogContent>
                                         </Dialog>
-                                        <AlertDialog><AlertDialogTrigger asChild><Button variant="destructive" size="sm">Delete</Button></AlertDialogTrigger>
+                                        <AlertDialog><AlertDialogTrigger asChild><Button variant="destructive" size="sm" disabled={!isAvailable}>Delete</Button></AlertDialogTrigger>
                                             <AlertDialogContent>
                                                 <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle></AlertDialogHeader>
                                                 <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
@@ -286,7 +304,7 @@ export default function DonorDashboard() {
                                         </AlertDialog>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )})}
                         </TableBody>
                     </Table>
                 </CardContent>

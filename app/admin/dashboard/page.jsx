@@ -292,38 +292,40 @@ export default function AdminDashboard() {
             </Card>
         </TabsContent>
 
-        <TabsContent value="requests" className="mt-4">
+           <TabsContent value="requests" className="mt-4">
             <Card>
                 <CardHeader>
                     <CardTitle>Aid Requests Management</CardTitle>
                     <div className="flex gap-4 pt-2">
-                        <div className="relative max-w-sm"><Input placeholder="Search by requester..." value={requestSearch} onChange={e => setRequestSearch(e.target.value)} /><Button variant="ghost" size="icon" className="absolute right-1 top-1 h-7 w-7" onClick={() => setRequestSearch('')}><X className="h-4 w-4" /></Button></div>
-                        <Select onValueChange={setUrgencyFilter} defaultValue="all"><SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All Urgencies</SelectItem><SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="high">High</SelectItem></SelectContent></Select>
+                        <div className="relative max-w-sm"><Input placeholder="Search by requester..." value={requestSearch} onChange={e => setRequestSearch(e.target.value)} /><Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setRequestSearch('')}><X className="h-4 w-4"/></Button></div>
+                        <Select onValueChange={setUrgencyFilter} value={urgencyFilter}>
+                            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Urgencies</SelectItem>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </CardHeader>
                 <CardContent>
                     <Table>
-                        <TableHeader><TableRow><TableHead>Requester</TableHead><TableHead>Type</TableHead><TableHead>Status</TableHead><TableHead>Urgency</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                        <TableHeader><TableRow><TableHead>Requester</TableHead><TableHead>Type</TableHead><TableHead>Quantity</TableHead><TableHead>Status</TableHead><TableHead>Urgency</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
                         <TableBody>
                             {requests.map(req => (
                                 <TableRow key={req.id}>
                                     <TableCell>{req.first_name} {req.last_name} ({req.email})</TableCell>
                                     <TableCell>{req.aid_type}</TableCell>
+                                    <TableCell>{req.quantity}</TableCell>
                                     <TableCell>{req.status}</TableCell>
                                     <TableCell>{req.urgency}</TableCell>
                                     <TableCell className="text-right space-x-2">
-                                        <Dialog onOpenChange={(isOpen) => { if(isOpen) { setSelectedRequest(req); setEditRequestData({ aid_type: req.aid_type }); }}}>
-                                            <DialogTrigger asChild><Button variant="outline" size="sm">Edit</Button></DialogTrigger>
-                                            <DialogContent>
-                                                <DialogHeader><DialogTitle>Edit Aid Request</DialogTitle></DialogHeader>
-                                                <div className="grid gap-4 py-4">
-                                                    <Label htmlFor="edit-aid-type">Aid Type</Label>
-                                                    <Input id="edit-aid-type" value={editRequestData.aid_type} onChange={e => setEditRequestData({ aid_type: e.target.value })} />
-                                                </div>
-                                                <DialogFooter><DialogClose asChild><Button onClick={handleUpdateAidRequest}>Save Changes</Button></DialogClose></DialogFooter>
-                                            </DialogContent>
+                                        <Dialog onOpenChange={(isOpen) => { if(isOpen) { setSelectedRequest(req); setEditRequestData({ aid_type: req.aid_type }); } }}>
+                                            <DialogTrigger asChild><Button variant="outline" size="sm" disabled={req.status === 'fulfilled'}>Edit</Button></DialogTrigger>
+                                            <DialogContent><DialogHeader><DialogTitle>Edit Aid Request</DialogTitle></DialogHeader><Input className="my-4" value={editRequestData.aid_type} onChange={e => setEditRequestData({ aid_type: e.target.value })} /><DialogFooter><DialogClose asChild><Button onClick={handleUpdateAidRequest}>Save</Button></DialogClose></DialogFooter></DialogContent>
                                         </Dialog>
-                                        <AlertDialog><AlertDialogTrigger asChild><Button variant="destructive" size="sm">Delete</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteRequest(req.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+                                        <AlertDialog><AlertDialogTrigger asChild><Button variant="destructive" size="sm" disabled={req.status === 'fulfilled'}>Delete</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteRequest(req.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -332,25 +334,39 @@ export default function AdminDashboard() {
                 </CardContent>
             </Card>
         </TabsContent>
+        
 
-        <TabsContent value="resources" className="mt-4">
+   <TabsContent value="resources" className="mt-4">
             <Card>
                 <CardHeader>
                     <CardTitle>Resource Management</CardTitle>
-                    <div className="relative max-w-sm mt-2"><Input placeholder="Search by donor or resource type..." value={resourceSearch} onChange={e => setResourceSearch(e.target.value)} /><Button variant="ghost" size="icon" className="absolute right-1 top-1 h-7 w-7" onClick={() => setResourceSearch('')}><X className="h-4 w-4" /></Button></div>
+                    <div className="relative max-w-sm mt-2">
+                        <Input placeholder="Search by donor or resource type..." value={resourceSearch} onChange={e => setResourceSearch(e.target.value)} />
+                        {resourceSearch && <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setResourceSearch('')}><X className="h-4 w-4"/></Button>}
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>
-                        <TableHeader><TableRow><TableHead>Contributor</TableHead><TableHead>Resource Type</TableHead><TableHead>Quantity</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+                        <TableHeader><TableRow><TableHead>Donor</TableHead><TableHead>Resource Type</TableHead><TableHead>Quantity</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
                         <TableBody>
-                            {resources.map(res => (
-                                <TableRow key={res.id}>
+                            {resources.map(res => {
+                                const isAvailable = res.quantity > 0;
+                                return (
+                                <TableRow key={res.id} className={!isAvailable ? 'bg-muted/50' : ''}>
                                     <TableCell>{res.first_name} {res.last_name} ({res.email})</TableCell>
                                     <TableCell>{res.resource_type}</TableCell>
                                     <TableCell>{res.quantity}</TableCell>
+                                    <TableCell>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                            isAvailable ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' :
+                                            'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300'
+                                        }`}>
+                                            {isAvailable ? 'Available' : 'Used'}
+                                        </span>
+                                    </TableCell>
                                     <TableCell className="text-right space-x-2">
                                         <Dialog onOpenChange={(isOpen) => { if(isOpen) { setSelectedResource(res); setEditResourceData({ resource_type: res.resource_type, quantity: res.quantity }); }}}>
-                                            <DialogTrigger asChild><Button variant="outline" size="sm">Edit</Button></DialogTrigger>
+                                            <DialogTrigger asChild><Button variant="outline" size="sm" disabled={!isAvailable}>Edit</Button></DialogTrigger>
                                             <DialogContent>
                                                 <DialogHeader><DialogTitle>Edit Resource</DialogTitle></DialogHeader>
                                                 <div className="grid gap-4 py-4">
@@ -360,10 +376,19 @@ export default function AdminDashboard() {
                                                 <DialogFooter><DialogClose asChild><Button onClick={handleUpdateResource}>Save</Button></DialogClose></DialogFooter>
                                             </DialogContent>
                                         </Dialog>
-                                        <AlertDialog><AlertDialogTrigger asChild><Button variant="destructive" size="sm">Delete</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle></AlertDialogHeader><AlertDialogDescription>This action cannot be undone.</AlertDialogDescription><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteResource(res.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+                                        <AlertDialog><AlertDialogTrigger asChild><Button variant="destructive" size="sm" disabled={!isAvailable}>Delete</Button></AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle></AlertDialogHeader>
+                                                <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDeleteResource(res.id)}>Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )})}
                         </TableBody>
                     </Table>
                 </CardContent>
