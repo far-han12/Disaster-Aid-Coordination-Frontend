@@ -80,7 +80,7 @@ export default function RequesterDashboard() {
 
   const handleDeleteRequest = async (requestId) => {
     try {
-        await api.deleteAidRequest(requestId, token);
+        await api.deleteAidRequestss(requestId, token);
         toast.success("Request deleted successfully!");
         fetchMyRequests();
     } catch (error) {

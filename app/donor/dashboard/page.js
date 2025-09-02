@@ -233,7 +233,7 @@ export default function DonorDashboard() {
                     <CardDescription>Add a resource you can provide. Your current location will be used.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleCreateResource} className="grid gap-4 max-w-md">
+                    <form onSubmit={handleCreateResource} className="grid gap-4 ">
                         <div className="grid gap-2">
                             <Label htmlFor="resourceType">Resource Type (e.g., Clean Water, Blankets)</Label>
                             <Input id="resourceType" value={resourceType} onChange={(e) => setResourceType(e.target.value)} required />
