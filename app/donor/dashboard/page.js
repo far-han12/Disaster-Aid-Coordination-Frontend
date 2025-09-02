@@ -189,7 +189,7 @@ export default function DonorDashboard() {
                                         <TableCell className="capitalize">{req.urgency}</TableCell>
                                     </TableRow>
                                 )) : (
-                                    <TableRow><TableCell colSpan="3" className="text-center">No requests found nearby. Click "Find" to begin.</TableCell></TableRow>
+                                    <TableRow><TableCell colSpan="3" className="text-center">No requests found nearby. Click &ldquo;Find Nearby Requests &quot; to begin.</TableCell></TableRow>
                                 )}
                             </TableBody>
                         </Table>
